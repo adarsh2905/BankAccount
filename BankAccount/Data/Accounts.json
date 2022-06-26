@@ -1,0 +1,12 @@
+[
+  {
+    "ID":  1,
+    "AccountNumber": "Adm202220624",
+    "Name":  "Admin"
+    "UserName": "admin",
+    "Password": "12345",
+    "Role": "staff",
+    "BankID": 1,
+    "Balance":  0
+  }
+]
