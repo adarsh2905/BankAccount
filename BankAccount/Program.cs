@@ -8,13 +8,6 @@ namespace BankAccount // Note: actual namespace depends on the project name.
     {
         static void Main(string[] args)
         {
-            // Take credentials from user
-            // Read banks.json file and take the first bank
-            // user = bank.VerifyUser(userNmae, password)
-            // if user is NULL > user doesn't exist. Please try again!!
-            // if user is account holder > display operations related to account holder
-            // if user is staff > display operations related to the staff
-
             Account user = loginMember();
             DisplayAccountDetails(user);
             userFunctions(user);
