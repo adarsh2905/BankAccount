@@ -28,6 +28,16 @@
     "Role": "customer",
     "BankID": 1,
     "Balance": 130.0
+  },
+  {
+    "ID": 4,
+    "Name": "Akshay",
+    "UserName": "akshay123",
+    "password": "Akshay@123",
+    "AccountNumber": "Aks20220630",
+    "Role": "customer",
+    "BankID": 1,
+    "Balance": 0.0
   }
 
 ]

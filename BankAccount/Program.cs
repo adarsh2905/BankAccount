@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using System;
 using Newtonsoft.Json;
+using BankLibrary;
 
 namespace BankAccount // Note: actual namespace depends on the project name.
 {
@@ -25,13 +26,14 @@ namespace BankAccount // Note: actual namespace depends on the project name.
             Console.WriteLine("Enter the password:");
             string password = Console.ReadLine();
 
-            string bankJsonPath = @"C:\Work\Training\DotNet\BankAccount\BankAccount\Data\Banks.json";
+            string bankJsonPath = @"C:\Work\Training\DotNetTraining\BankAccount\BankAccount\Data\Banks.json";
             string bankJsonString = System.IO.File.ReadAllText(bankJsonPath);
             var list = JsonConvert.DeserializeObject<List<Bank>>(bankJsonString);
             
-            var first_bank = list.First();            
+            var first_bank = list.First();
 
-            Account newUser = first_bank.VerifyUser(userName, password);
+            BankServices bankservice = new BankServices();
+            Account newUser = bankservice.VerifyUser(first_bank, userName, password);
             // Console.ReadLine();
 
             return newUser;
@@ -40,17 +42,18 @@ namespace BankAccount // Note: actual namespace depends on the project name.
 
         public static void userFunctions(Account account)
         {
+
             char x;
             do
             {
-                if (account.Role.Equals("customer"))
+                if (account.Role.Equals(Role.Customer))
                 {
                     Console.WriteLine("Enter '1' to deposit money, '2' to withdraw money and '3' to transfer money: ");
                     var input = Console.ReadLine()[0];
 
                     Bank b = new Bank();
 
-                    string accountPath = @"C:\Work\Training\DotNet\BankAccount\BankAccount\Data\Accounts.json";
+                    string accountPath = @"C:\Work\Training\DotNetTraining\BankAccount\BankAccount\Data\Accounts.json";
                     string accountJsonString = System.IO.File.ReadAllText(accountPath);
                     var accountList = JsonConvert.DeserializeObject<List<Account>>(accountJsonString);
 
@@ -64,7 +67,7 @@ namespace BankAccount // Note: actual namespace depends on the project name.
                         {
                             if(account.ID == acc.ID)
                             {
-                                b.Deposit(Bank.currencyConvert(amount), acc);
+                                AccountServices.Deposit(BankServices.currencyConvert(amount), acc);
                             }
                         }
 
@@ -78,7 +81,7 @@ namespace BankAccount // Note: actual namespace depends on the project name.
                         {
                             if (account.ID == acc.ID)
                             {
-                                b.Withdraw(amount, acc);
+                                AccountServices.Withdraw(amount, acc);
                             }
                         }
 
@@ -108,7 +111,7 @@ namespace BankAccount // Note: actual namespace depends on the project name.
                             }
                         }
 
-                        b.Transfer(amount, srcAccnt, destAccnt);
+                        AccountServices.Transfer(amount, srcAccnt, destAccnt);
 
 
                     }
@@ -118,7 +121,7 @@ namespace BankAccount // Note: actual namespace depends on the project name.
                     }
 
                     var NewAccountList = Newtonsoft.Json.JsonConvert.SerializeObject(accountList);
-                    System.IO.File.WriteAllText(@"C:\Work\Training\DotNet\BankAccount\BankAccount\Data\Accounts.json", NewAccountList);
+                    System.IO.File.WriteAllText(@"C:\Work\Training\DotNetTraining\BankAccount\BankAccount\Data\Accounts.json", NewAccountList);
                     
                 }
                 else
@@ -131,22 +134,22 @@ namespace BankAccount // Note: actual namespace depends on the project name.
                     switch (input)
                     {
                         case 1:
-                            Bank.createUserAccount();
+                            BankServices.createUserAccount();
                             break;
 
                         case 2:
-                            Bank.updateOrDeleteUser();
+                            BankServices.updateOrDeleteUser();
                             break;
 
                         case 3:
                             Console.WriteLine("Enter the amount: ");
                             double amount = Double.Parse(Console.ReadLine());
-                            double convertedAmount = Bank.currencyConvert(amount);
+                            double convertedAmount = BankServices.currencyConvert(amount);
                             Console.WriteLine("Amount in INR: " + convertedAmount);
                             break;
 
                         case 4:
-                            Bank.viewTransactionHistory();
+                            BankServices.viewTransactionHistory();
                             break;
 
                         default:
@@ -172,5 +175,11 @@ namespace BankAccount // Note: actual namespace depends on the project name.
             Console.ReadLine();
         }
         
+    }
+
+    enum Role
+    {
+        Staff,
+        Customer
     }
 }
