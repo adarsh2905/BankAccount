@@ -8,11 +8,12 @@ namespace BankAccount
 {
     public class Transaction
     {
-        public int ID { get; set; }
         public double Amount { get; set; }
-        public int MadeBy { get; set; }
-        public int MadeTo { get; set; }
+        public int From { get; set; }
+        public int To { get; set; }
         public DateTime Time { get; set; }
+        public string? Type { get; set; }
+        public string? ID { get; set; }
 
     }
 }

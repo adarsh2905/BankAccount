@@ -1,7 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using System;
 using Newtonsoft.Json;
-using BankLibrary;
+using BankLibrary.Services;
 
 namespace BankAccount // Note: actual namespace depends on the project name.
 {
@@ -9,24 +9,46 @@ namespace BankAccount // Note: actual namespace depends on the project name.
     {
         static void Main(string[] args)
         {
-            Account user = loginMember();
-            DisplayAccountDetails(user);
-            userFunctions(user);
+            Account user;
+
+            Console.WriteLine("Hi there !!");
+            Console.WriteLine("Welcome to HDFC Bank");
+            Console.WriteLine("Enter your login credentials to login:");
+
+            string x;
+            do
+            {
+                user = loginMember();
+
+                if (user == null)
+                {
+                    
+                    Console.WriteLine("Invalid credentials. Please try again.");
+
+                }
+                else
+                {
+                    DisplayAccountDetails(user);
+                    userFunctions(user);
+                }
+                Console.WriteLine("Do you want to login as another user ? Press 'y' to continue, else press any key and enter to terminate.");
+                x = Console.ReadLine();
+
+            } while(x == "y" || x == "Y");
 
         }
 
         public static Account loginMember()
         {
-            Console.WriteLine("Hi there !!");
-            Console.WriteLine("Welcome to HDFC Bank");
-            Console.WriteLine("Enter your login credentials to login:");
+            
 
             Console.WriteLine("Enter your username:");
             string userName = Console.ReadLine();
             Console.WriteLine("Enter the password:");
             string password = Console.ReadLine();
+            Console.WriteLine("\n");
 
-            string bankJsonPath = @"C:\Work\Training\DotNetTraining\BankAccount\BankAccount\Data\Banks.json";
+            string bankJsonPath = @"C:\Work\Training\DotNetTraining\BankAccount\BankLibrary\Data\Banks.json";
             string bankJsonString = System.IO.File.ReadAllText(bankJsonPath);
             var list = JsonConvert.DeserializeObject<List<Bank>>(bankJsonString);
             
@@ -43,17 +65,17 @@ namespace BankAccount // Note: actual namespace depends on the project name.
         public static void userFunctions(Account account)
         {
 
-            char x;
+            string x;
             do
             {
-                if (account.Role.Equals(Role.Customer))
+                if (account.Role == "Customer" || account.Role == "customer")
                 {
-                    Console.WriteLine("Enter '1' to deposit money, '2' to withdraw money and '3' to transfer money: ");
+                    Console.WriteLine("Enter '1' to deposit money, \n '2' to withdraw money, \n '3' to transfer money \n and '4 ' to see transaction history: ");
                     var input = Console.ReadLine()[0];
 
                     Bank b = new Bank();
 
-                    string accountPath = @"C:\Work\Training\DotNetTraining\BankAccount\BankAccount\Data\Accounts.json";
+                    string accountPath = @"C:\Work\Training\DotNetTraining\BankAccount\BankLibrary\Data\Accounts.json";
                     string accountJsonString = System.IO.File.ReadAllText(accountPath);
                     var accountList = JsonConvert.DeserializeObject<List<Account>>(accountJsonString);
 
@@ -61,13 +83,16 @@ namespace BankAccount // Note: actual namespace depends on the project name.
                     {
                         Console.WriteLine("Enter amount to deposit: ");
                         double amount = Double.Parse(Console.ReadLine());
+                        Console.WriteLine("Enter the currency: (INR/USD/AED/PND/EUR)");
+                        string type = Console.ReadLine();
 
+                        double convertedAmount = BankServices.currencyConvert(amount, type);
 
-                        foreach( var acc in accountList)
+                        foreach ( var acc in accountList)
                         {
                             if(account.ID == acc.ID)
                             {
-                                AccountServices.Deposit(BankServices.currencyConvert(amount), acc);
+                                AccountServices.Deposit(convertedAmount, acc);
                             }
                         }
 
@@ -115,13 +140,28 @@ namespace BankAccount // Note: actual namespace depends on the project name.
 
 
                     }
+
+                    else if(input == '4')
+                    {
+                        string transactionPath = @"C:\Work\Training\DotNetTraining\BankAccount\BankLibrary\Data\Transactions.json";
+                        string transactionJsonString = File.ReadAllText(transactionPath);
+                        var transactionList = JsonConvert.DeserializeObject<List<Transaction>>(transactionJsonString);
+
+                        foreach(var trans in transactionList)
+                        {
+                            if(trans.From == account.ID)
+                            {
+                                BankServices.viewTransactionHistory(trans);
+                            }
+                        }
+                    }
                     else
                     {
                         Console.WriteLine("Enter a valid input !!");
                     }
 
                     var NewAccountList = Newtonsoft.Json.JsonConvert.SerializeObject(accountList);
-                    System.IO.File.WriteAllText(@"C:\Work\Training\DotNetTraining\BankAccount\BankAccount\Data\Accounts.json", NewAccountList);
+                    System.IO.File.WriteAllText(@"C:\Work\Training\DotNetTraining\BankAccount\BankLibrary\Data\Accounts.json", NewAccountList);
                     
                 }
                 else
@@ -133,23 +173,110 @@ namespace BankAccount // Note: actual namespace depends on the project name.
 
                     switch (input)
                     {
+                        
+
                         case 1:
-                            BankServices.createUserAccount();
+
+                            string ip;
+                            do
+                            {
+                                string bankJsonPath = @"C:\Work\Training\DotNetTraining\BankAccount\BankLibrary\Data\Banks.json";
+                                string bankJsonString = System.IO.File.ReadAllText(bankJsonPath);
+                                var list = JsonConvert.DeserializeObject<List<Bank>>(bankJsonString);
+
+                                var first_bank = list.First();
+
+                                string accountJsonPath1 = @"C:\Work\Training\DotNetTraining\BankAccount\BankLibrary\Data\Accounts.json";
+                                string accountJsonString1 = File.ReadAllText(accountJsonPath1);
+                                var accountList1 = JsonConvert.DeserializeObject<List<Account>>(accountJsonString1);
+
+                                Console.WriteLine("Enter new account holder's name: ");
+                                string name = Console.ReadLine();
+                                Console.WriteLine("Enter the role: (Staff/Customer)");
+                                string role = Console.ReadLine();
+                                
+                                Console.WriteLine("Enter the username: ");
+                                string userName = Console.ReadLine();
+
+                                foreach (var acc in accountList1)
+                                {
+                                    if (acc.UserName.Equals(userName))
+                                    {
+                                        Console.WriteLine("This username already exists. Try something else.");
+                                    }
+                                    break;
+                                }
+
+                                Console.WriteLine("Enter the password: ");
+                                string password = Console.ReadLine();
+                                BankServices.createUserAccount(first_bank, accountList1, name, role, userName, password);
+                                Console.WriteLine("Do you want to continue creating another account ? Press 'y' to continue or any other key and then enter to quit.");
+                                ip = Console.ReadLine();
+                            } while (ip == "y" || ip == "Y");
+
                             break;
 
                         case 2:
-                            BankServices.updateOrDeleteUser();
+
+                            string accountJsonPath2 = @"C:\Work\Training\DotNetTraining\BankAccount\BankLibrary\Data\Accounts.json";
+                            string accountJsonString2 = File.ReadAllText(accountJsonPath2);
+                            var accountList2 = JsonConvert.DeserializeObject<List<Account>>(accountJsonString2);
+
+                            Console.WriteLine("Enter the account ID which you want to update/delete: ");
+                            int AccountId = Convert.ToInt32(Console.ReadLine());
+                            Console.WriteLine("Enter '1' to update, '2' to delete: ");
+                            var option = Console.ReadLine();
+
+                            bool check1 = false;
+                            bool newCheck1 = BankServices.updateOrDeleteUser(accountList2, AccountId, option, check1);
+                            if (newCheck1 == true)
+                            {
+                                Console.WriteLine("Operation performed successfully.");
+                            }
+                            else
+                            {
+                                Console.WriteLine("No such user exists !!");
+                            }
+
                             break;
 
                         case 3:
                             Console.WriteLine("Enter the amount: ");
                             double amount = Double.Parse(Console.ReadLine());
-                            double convertedAmount = BankServices.currencyConvert(amount);
+
+                            Console.WriteLine("Enter the currency type: (INR/USD/AUD/EUR/PND)");
+                            string type = Console.ReadLine().ToUpper();
+
+                            double convertedAmount = BankServices.currencyConvert(amount, type);
                             Console.WriteLine("Amount in INR: " + convertedAmount);
                             break;
 
                         case 4:
-                            BankServices.viewTransactionHistory();
+
+                            Console.WriteLine("Enter the account ID: ");
+                            int ID = Convert.ToInt32(Console.ReadLine());
+
+                            string transactionPath = @"C:\Work\Training\DotNetTraining\BankAccount\BankLibrary\Data\Transactions.json";
+                            string transactionJsonString = File.ReadAllText(transactionPath);
+                            var transactionList = JsonConvert.DeserializeObject<List<Transaction>>(transactionJsonString);
+
+
+                            bool check2 = false;
+
+                            foreach (var trans in transactionList)
+                            {
+                                if (trans.From == ID)
+                                {
+                                    check2 = true;
+                                    BankServices.viewTransactionHistory(trans);
+                                }
+                            }
+                             
+                            if (check2 == false)
+                            {
+                                Console.WriteLine("Either no transactions have been made to this id or it's not a valid account id.");
+                            }
+
                             break;
 
                         default:
@@ -159,9 +286,9 @@ namespace BankAccount // Note: actual namespace depends on the project name.
                     }
                 }
 
-                Console.WriteLine("Do you want to continue doing other operations ? ");
-                x = Console.ReadLine()[0];
-            } while (x == 'y' || x == 'Y');
+                Console.WriteLine("Do you want to continue doing other operations ? Enter 'y' to continue or any other key to exit.");
+                x = Console.ReadLine();
+            } while (x == "y" || x == "Y");
         }
 
         public static void DisplayAccountDetails(Account account)
@@ -169,6 +296,7 @@ namespace BankAccount // Note: actual namespace depends on the project name.
             Console.WriteLine("Account ID: " + account.ID);
             Console.WriteLine("Account Holder's Name: " + account.Name);
             Console.WriteLine("Account Number: " + account.AccountNumber);
+            Console.WriteLine("IFSC Code: " + account.IfscCode);
             Console.WriteLine("Bank ID: " + account.BankID);
             Console.WriteLine("Balance: " + account.Balance);
 

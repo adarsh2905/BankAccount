@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BankAccount;
 
-namespace BankLibrary
+namespace BankLibrary.Services
 {
     public class AccountServices
     {
@@ -15,6 +15,7 @@ namespace BankLibrary
         public static void Deposit(double amount, Account account)
         {
             account.Balance += amount;
+            BankServices.DepositTransact(amount, account);
 
         }
 
@@ -33,6 +34,7 @@ namespace BankLibrary
                 account.Balance -= amount;
 
             }
+            BankServices.WithdrawTransact(amount, account);
 
         }
 
@@ -67,7 +69,7 @@ namespace BankLibrary
                             Console.WriteLine("Invalid input.");
                         }
 
-                        Console.WriteLine("Press '1' to continue, or press any other key to exit.");
+                        Console.WriteLine("Press '1' to continue, or press any other key and then press Enter to exit.");
                         input = Console.ReadLine();
                     } while (input == "1");
 
